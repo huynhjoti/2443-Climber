@@ -20,14 +20,15 @@ public final class Constants {
         public static final double L1RUNG = 0;
         public static final double L2L3RUNG = 0;
         public static final double ACTIVATE = 0;
-        public static final double MAX_SPEED = 0;
+        public static final double MAX_SPEED = 0.5;
 
         //Motor Configurations for Leader and Follower Motor
         public static final TalonFXConfiguration leaderConfig = new TalonFXConfiguration();
         public static final TalonFXConfiguration followerConfig = new TalonFXConfiguration();
         public static final MotionMagicConfigs climberMMConfig = new MotionMagicConfigs();
         static{
-            leaderConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+            leaderConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+            leaderConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
             
             //Current Limit Config for Leader Motor
             leaderConfig.CurrentLimits.StatorCurrentLimitEnable = false;
@@ -36,13 +37,12 @@ public final class Constants {
             leaderConfig.CurrentLimits.SupplyCurrentLimit = 0;
             
             //Software Limit Switch Config for Leader Motor
-            leaderConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = false;
-            leaderConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0;
-            leaderConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
+            leaderConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+            leaderConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 50;
+            leaderConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
             leaderConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
             
-            followerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-            followerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+            followerConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
             //Current Limit Config for Follower Motor
             followerConfig.CurrentLimits.StatorCurrentLimitEnable = false;
@@ -51,9 +51,9 @@ public final class Constants {
             followerConfig.CurrentLimits.SupplyCurrentLimit = 0;
 
             //Software Limit Switch Config for Follower Motor
-            followerConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = false;
-            followerConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0;
-            followerConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = false;
+            followerConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+            followerConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 50;
+            followerConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
             followerConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
             
             //Slot 0 Config for the Leader Motor

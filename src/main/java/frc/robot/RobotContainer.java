@@ -18,7 +18,7 @@ public class RobotContainer {
   XboxController xbox;
 
   public RobotContainer() {
-    climber = new Climber(0, 0, 0, 0);
+    climber = new Climber(15, 9, 1, 0);
     xbox = new XboxController(0);
     configureBindings();
   }

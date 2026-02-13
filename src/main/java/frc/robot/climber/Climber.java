@@ -11,6 +11,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimberConstants;
 
@@ -31,10 +32,21 @@ public class Climber extends SubsystemBase {
     followerMotor.getConfigurator().apply(ClimberConstants.followerConfig);
     followerMotor.getConfigurator().refresh(ClimberConstants.followerConfig);
 
-    followerMotor.setControl(new Follower(leaderMotorID, MotorAlignmentValue.Aligned));
+    followerMotor.setControl(new Follower(leaderMotorID, MotorAlignmentValue.Opposed));
 
     topLS = new DigitalInput(topLSID);
     hallEffect = new DigitalInput(hallEffectID);
+
+    leaderMotor.setPosition(1);
+    followerMotor.setPosition(1);
+  }
+
+  public double getLeaderPosition(){
+    return leaderMotor.getPosition().getValueAsDouble();
+  }
+
+  public double getFollowerPosition(){
+    return followerMotor.getPosition().getValueAsDouble();
   }
 
   public void goToHeight(double position){
@@ -62,22 +74,26 @@ public class Climber extends SubsystemBase {
   }
 
   public void setSpeed(DoubleSupplier speed){
-    leaderMotor.set(speed.getAsDouble());
+    leaderMotor.set(deadzone(speed.getAsDouble()));
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    if(topLS.get()){
-      leaderMotor.setPosition(0);
-      followerMotor.setPosition(0);
-    }
+    // if(topLS.get()){
+    //   leaderMotor.setPosition(0);
+    //   followerMotor.setPosition(0);
+    // }
 
-    if(topLS.get() && (leaderMotor.get() > 0)){
-      leaderMotor.set(0);
-    }
-    else if(hallEffect.get() && (leaderMotor.get() < 0)){
-      leaderMotor.set(0);
-    }
+    // if(topLS.get() && (leaderMotor.get() > 0)){
+    //   leaderMotor.set(0);
+    // }
+    // else if(hallEffect.get() && (leaderMotor.get() < 0)){
+    //   leaderMotor.set(0);
+    // }
+
+    SmartDashboard.putNumber("[C] Leader Position", getLeaderPosition());
+    SmartDashboard.putNumber("[C] Follower Position", getFollowerPosition());
+
   }
 }
