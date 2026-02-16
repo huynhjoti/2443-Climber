@@ -4,21 +4,22 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.climber.Climber;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class ManualClimb extends Command {
-  public Climber climber;
-  public DoubleSupplier speed;
-  /** Creates a new ManualClimb. */
-  public ManualClimb(Climber newClimber, DoubleSupplier newSpeed) {
-    climber = newClimber;
-    speed = newSpeed;
-    addRequirements(climber);
+public class VerticalCmd extends Command
+ {
+  
+  Climber climberSubsystem;
+  private double angle;
+
+  /** Creates a new VerticalCmd. */
+  public VerticalCmd(Climber newclimber, double angle) {
     // Use addRequirements() here to declare subsystem dependencies.
+    this.angle = angle;
+    climberSubsystem = newclimber;
+    addRequirements(climberSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -28,18 +29,18 @@ public class ManualClimb extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    climber.setSpeed(speed);
+    climberSubsystem.goToAngle(angle);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    climber.stopMotors();
+    climberSubsystem.stopPivot();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return climberSubsystem.pidAtSetpoint();
   }
 }

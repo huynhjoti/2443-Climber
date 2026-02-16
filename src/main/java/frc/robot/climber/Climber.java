@@ -6,9 +6,6 @@ package frc.robot.climber;
 
 import static edu.wpi.first.units.Units.Amps;
 
-import java.util.function.DoubleSupplier;
-import java.util.spi.CurrencyNameProvider;
-
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -24,17 +21,26 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import edu.wpi.first.wpilibj2.command.Command;
 
 public class Climber extends SubsystemBase {
   /** Creates a new Climber. */
   private TalonFX leaderMotor;
   private TalonFX followerMotor;
+  TalonFX PivotMotor;
+ 
+  private final PIDController pivotPID;
+  private final DigitalInput LimitSwitch;
 
   private DigitalInput topLS;
   private DigitalInput hallEffect;
+
+  private double setpoint;
 
    //Climber hook distances (position) for each rung of the tower
   public final double AUTO_L1 = 0;
@@ -42,6 +48,24 @@ public class Climber extends SubsystemBase {
   public final double L2L3RUNG = 0;
   public final double RATCHET = 0;
   private final double MAX_SPEED = 0.5;
+
+  final TalonFXConfiguration pivotConfig = new TalonFXConfiguration()
+    .withMotorOutput(
+      new MotorOutputConfigs()
+        .withNeutralMode(NeutralModeValue.Brake)).withCurrentLimits(
+      new CurrentLimitsConfigs()
+        .withStatorCurrentLimitEnable(false)
+        .withStatorCurrentLimit(Amps.of(0))
+        .withSupplyCurrentLimitEnable(false)
+        .withSupplyCurrentLimit(Amps.of(0))
+        ).withSoftwareLimitSwitch(
+        new SoftwareLimitSwitchConfigs()
+        .withForwardSoftLimitEnable(true)
+        .withForwardSoftLimitThreshold(50)
+        .withReverseSoftLimitEnable(true)
+        .withReverseSoftLimitThreshold(0)
+      );
+        
 
   final TalonFXConfiguration leaderConfig = new TalonFXConfiguration()
     .withMotorOutput(
@@ -102,7 +126,13 @@ public class Climber extends SubsystemBase {
         .withReverseSoftLimitThreshold(0)
     );
 
-  public Climber(int leaderMotorID, int followerMotorID, int topLSID, int hallEffectID) {
+  public Climber(int leaderMotorID, int followerMotorID, int topLSID, int hallEffectID, int pivotID, int LimitSwitchID) {
+    PivotMotor = new TalonFX(pivotID); 
+    pivotPID = new PIDController(0.2, 0, 0);
+    LimitSwitch = new DigitalInput(LimitSwitchID);
+    pivotPID.setTolerance(0);
+    
+    
     leaderMotor = new TalonFX(leaderMotorID);
     leaderMotor.getConfigurator().apply(leaderConfig);
     leaderMotor.getConfigurator().refresh(leaderConfig);
@@ -117,6 +147,27 @@ public class Climber extends SubsystemBase {
     hallEffect = new DigitalInput(hallEffectID);
   }
 
+  public boolean LimitSwitchPressed() {
+    return !LimitSwitch.get();
+  }
+
+  public void goToAngle(double targetAngle) {
+    double output = pivotPID.calculate(getPivotEncoder(), targetAngle);
+    PivotMotor.set(output);
+  }
+
+  public double getPivotEncoder() {
+    return PivotMotor.getRotorPosition().getValueAsDouble();
+  }
+
+  public boolean pidAtSetpoint() {
+    return pivotPID.atSetpoint();
+  }
+
+  public void stopMotor() {
+    PivotMotor.stopMotor();
+  }
+
   public double getLeaderPosition(){
     return leaderMotor.getPosition().getValueAsDouble();
   }
@@ -125,38 +176,54 @@ public class Climber extends SubsystemBase {
     return followerMotor.getPosition().getValueAsDouble();
   }
 
+  public boolean getHallEffectValue(){
+    return !hallEffect.get();
+  }
+  
+  public boolean isAtSetpoint(){
+    return Math.abs(getLeaderPosition() - setpoint) >= 0;
+  }
+
   public void goToHeight(double position){
+    setpoint = position;
     leaderMotor.setControl(new MotionMagicVoltage(position));
   }
 
   public void stopMotors(){
     leaderMotor.stopMotor();
-    followerMotor.stopMotor();
-  }
-  
-  //Deadzone of the controller to set the speed of the climber
-  public double deadzone(double speed){
-    if(Math.abs(speed) < 0.1){
-      return 0;
-    }
-    else if(speed >= MAX_SPEED){
-      return MAX_SPEED;
-    }
-    else if(speed <= MAX_SPEED){
-      return -MAX_SPEED;
-    }
-    else{
-      return speed;
-    }
   }
 
-  public void setSpeed(DoubleSupplier speed){
-    leaderMotor.set(deadzone(speed.getAsDouble()));
+  public Command clockwise() {
+    return this.run(() -> PivotMotor.set(0.1));
+  }
+
+  public Command counterClockWise() {
+    return this.run(() -> PivotMotor.set(-0.1));
+  }
+
+  public Command stopPivot() {
+    return this.run(() -> stopMotor());
+  }
+
+  public Command up(){
+    return this.run(() -> leaderMotor.set(MAX_SPEED));
+  }
+
+  public Command down(){
+    return this.run(() -> leaderMotor.set(-MAX_SPEED));
+  }
+
+  public Command stop(){
+    return this.run(() -> stopMotors());
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    if(LimitSwitchPressed()) {
+      PivotMotor.setPosition(0);
+    }
+    
     if(topLS.get()){
       leaderMotor.setPosition(0);
       followerMotor.setPosition(0);
@@ -171,6 +238,10 @@ public class Climber extends SubsystemBase {
 
     SmartDashboard.putNumber("[C] Leader Position", getLeaderPosition());
     SmartDashboard.putNumber("[C] Follower Position", getFollowerPosition());
+    SmartDashboard.putBoolean("[C] Hall Effect", getHallEffectValue());
+    SmartDashboard.putNumber("[C] Setpoint", setpoint);
 
+    SmartDashboard.putBoolean("Limit Switch", LimitSwitchPressed());
+    SmartDashboard.putNumber("Pivot Position", getPivotEncoder());
   }
 }
