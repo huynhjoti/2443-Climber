@@ -61,7 +61,7 @@ public class Climber extends SubsystemBase {
         ).withSoftwareLimitSwitch(
         new SoftwareLimitSwitchConfigs()
         .withForwardSoftLimitEnable(true)
-        .withForwardSoftLimitThreshold(50)
+        .withForwardSoftLimitThreshold(49)
         .withReverseSoftLimitEnable(true)
         .withReverseSoftLimitThreshold(0)
       );
@@ -82,7 +82,7 @@ public class Climber extends SubsystemBase {
     .withSoftwareLimitSwitch(
       new SoftwareLimitSwitchConfigs()
         .withForwardSoftLimitEnable(true)
-        .withForwardSoftLimitThreshold(50)
+        .withForwardSoftLimitThreshold(49)
         .withReverseSoftLimitEnable(true)
         .withReverseSoftLimitThreshold(0)
         )
@@ -121,7 +121,7 @@ public class Climber extends SubsystemBase {
     .withSoftwareLimitSwitch(
       new SoftwareLimitSwitchConfigs()
         .withForwardSoftLimitEnable(true)
-        .withForwardSoftLimitThreshold(50)
+        .withForwardSoftLimitThreshold(49)
         .withReverseSoftLimitEnable(true)
         .withReverseSoftLimitThreshold(0)
     );
@@ -193,6 +193,7 @@ public class Climber extends SubsystemBase {
     leaderMotor.stopMotor();
   }
 
+  //Pivot Manual Commands
   public Command clockwise() {
     return this.run(() -> PivotMotor.set(0.1));
   }
@@ -204,7 +205,8 @@ public class Climber extends SubsystemBase {
   public Command stopPivot() {
     return this.run(() -> stopMotor());
   }
-
+  
+  //Elevator Manual Commands
   public Command up(){
     return this.run(() -> leaderMotor.set(MAX_SPEED));
   }
@@ -224,17 +226,17 @@ public class Climber extends SubsystemBase {
       PivotMotor.setPosition(0);
     }
     
-    if(topLS.get()){
-      leaderMotor.setPosition(0);
-      followerMotor.setPosition(0);
-    }
+    // if(topLS.get()){
+    //   leaderMotor.setPosition(0);
+    //   followerMotor.setPosition(0);
+    // }
 
-    if(topLS.get() && (leaderMotor.get() > 0)){
-      leaderMotor.set(0);
-    }
-    else if(hallEffect.get() && (leaderMotor.get() < 0)){
-      leaderMotor.set(0);
-    }
+    // if(topLS.get() && (leaderMotor.get() > 0)){
+    //   leaderMotor.set(0);
+    // }
+    // else if(hallEffect.get() && (leaderMotor.get() < 0)){
+    //   leaderMotor.set(0);
+    // }
 
     SmartDashboard.putNumber("[C] Leader Position", getLeaderPosition());
     SmartDashboard.putNumber("[C] Follower Position", getFollowerPosition());

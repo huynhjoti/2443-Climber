@@ -18,21 +18,24 @@ public class RobotContainer {
   CommandXboxController xbox;
 
   public RobotContainer() {
-    climber = new Climber(11, 10, 1, 2, 9, 0);
+    climber = new Climber(14, 15, 1, 2, 0, 0);
     xbox = new CommandXboxController(0);
     configureBindings();
   }
 
   private void configureBindings() {
-    //xbox.a().whileTrue(climber.up());
-    //xbox.a().whileFalse(climber.stop());
-    //xbox.b().whileTrue(climber.down());
-    //xbox.b().whileFalse(climber.stop());
-    xbox.a().whileTrue(climber.clockwise());
-    xbox.a().whileFalse(climber.stopPivot());
-    xbox.b().whileTrue(climber.counterClockWise());
-    xbox.b().whileFalse(climber.stopPivot());
-    xbox.x().onTrue(new VerticalCmd(climber, 25));
+    //Elevator Manual Buttons
+    xbox.a().whileTrue(climber.up());
+    xbox.a().whileFalse(climber.stop());
+    xbox.b().whileTrue(climber.down());
+    xbox.b().whileFalse(climber.stop());
+
+    //Pivot Manual Buttons 
+    // xbox.a().whileTrue(climber.clockwise());
+    // xbox.a().whileFalse(climber.stopPivot());
+    // xbox.b().whileTrue(climber.counterClockWise());
+    // xbox.b().whileFalse(climber.stopPivot());
+    // xbox.x().onTrue(new VerticalCmd(climber, 25));
   }
 
   public Command getAutonomousCommand() {
