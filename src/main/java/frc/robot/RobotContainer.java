@@ -25,10 +25,10 @@ public class RobotContainer {
 
   private void configureBindings() {
     //Elevator Manual Buttons
-    xbox.a().whileTrue(climber.up());
-    xbox.a().whileFalse(climber.stop());
-    xbox.b().whileTrue(climber.down());
-    xbox.b().whileFalse(climber.stop());
+    // xbox.a().whileTrue(climber.up());
+    // xbox.a().whileFalse(climber.stop());
+    // xbox.b().whileTrue(climber.down());
+    // xbox.b().whileFalse(climber.stop());
 
     //Pivot Manual Buttons 
     // xbox.a().whileTrue(climber.clockwise());
