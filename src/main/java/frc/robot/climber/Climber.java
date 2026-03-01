@@ -71,12 +71,19 @@ public class Climber extends SubsystemBase {
   public final double L1RUNG = 0;
   public final double L2L3RUNG = 0;
   public final double RATCHET = 0;
+<<<<<<< HEAD
   private final double MANUAL_SPEED = 0.5;
+=======
+  private final double MAX_SPEED = 0.5;
+>>>>>>> 9596b3513e93dc63fbcb6e643550ee34bd3e1b88
   
   //Pivot Position to make the climber vertical
   public final double VERTICAL_ANGLE = 0;
 
+<<<<<<< HEAD
   //Margins for the triggers to determine if the climber/pivot is at the setpoint. 
+=======
+>>>>>>> 9596b3513e93dc63fbcb6e643550ee34bd3e1b88
   private final double CMARGIN = 0;
   private final double PMARGIN = 0;
 
@@ -160,6 +167,7 @@ public class Climber extends SubsystemBase {
         .withSupplyCurrentLimit(Amps.of(0))
       );
 
+<<<<<<< HEAD
   //Motion Magic Control Modes for the climber and pivot.
   private MotionMagicVoltage profileReq = new MotionMagicVoltage(0);
   private MotionMagicVoltage pivotMagic = new MotionMagicVoltage(0);
@@ -176,6 +184,15 @@ public class Climber extends SubsystemBase {
   private double climbVoltage = 0.0;
   private double pivotVoltage = 0.0;
 
+=======
+  private MotionMagicVoltage profileReq = new MotionMagicVoltage(0);
+
+  private MotionMagicVoltage pivotMagic = new MotionMagicVoltage(0);
+
+  private double climbSetpoint = 0.0;
+  private double pivotSetpoint = 0.0;
+
+>>>>>>> 9596b3513e93dc63fbcb6e643550ee34bd3e1b88
   public Climber(int leaderMotorID, int followerMotorID, int topLSID, int hallEffectID, int pivotID, int pivotLSID) {
     PivotMotor = new TalonFX(pivotID); 
     pivotLS = new DigitalInput(pivotLSID);
@@ -198,12 +215,25 @@ public class Climber extends SubsystemBase {
     return !pivotLS.get();
   }
 
+<<<<<<< HEAD
   public boolean topLSPressed() {
     return !topLS.get();
   }
 
   public boolean hallEffectPressed(){
     return !hallEffect.get();
+=======
+  public boolean atPosition(){
+    return MathUtil.isNear(pivotSetpoint, getPivotEncoder(), PMARGIN);
+  }
+
+  public void setClimberSetpoint(double newSetpoint){
+    climbSetpoint = newSetpoint;
+  }
+
+  public void setPivotSetpoint(double newSetpoint){
+    pivotSetpoint = newSetpoint;
+>>>>>>> 9596b3513e93dc63fbcb6e643550ee34bd3e1b88
   }
 
   public double getPivotEncoder() {
@@ -214,6 +244,7 @@ public class Climber extends SubsystemBase {
     return leaderMotor.getPosition().getValueAsDouble();
   }
 
+<<<<<<< HEAD
   private void setClimberSetpoint(double newSetpoint){
     double newHeight = MathUtil.clamp(newSetpoint, minimumHeight, maximumHeight);
     climbSetpoint = newHeight;
@@ -238,6 +269,12 @@ public class Climber extends SubsystemBase {
     pivotVoltage = newVoltage;
   }
 
+=======
+  public boolean getHallEffectValue(){
+    return !hallEffect.get();
+  }
+
+>>>>>>> 9596b3513e93dc63fbcb6e643550ee34bd3e1b88
   public void stopMotors(){
     leaderMotor.stopMotor();
   }
@@ -269,6 +306,7 @@ public class Climber extends SubsystemBase {
   }
 
   public Trigger topLSTrigger(){
+<<<<<<< HEAD
     return new Trigger(() -> topLSPressed());
   }
 
@@ -327,6 +365,17 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putNumber("[C] Pivot Position", getPivotEncoder());
     SmartDashboard.putNumber("[C] Pivot Setpoint", pivotSetpoint);
     SmartDashboard.putBoolean("[C] Pivot At Setpoint", pivotAtPositionTrigger().getAsBoolean());
+=======
+    return new Trigger(() -> topLS.get());
+  }
+
+  public Trigger hallEffectTrigger(){
+    return new Trigger(() -> hallEffect.get());
+  }
+
+  public Trigger atPositionTrigger(){
+    return new Trigger(() -> MathUtil.isNear(climbSetpoint, getLeaderPosition(), CMARGIN));
+>>>>>>> 9596b3513e93dc63fbcb6e643550ee34bd3e1b88
   }
 
   @Override
@@ -336,6 +385,7 @@ public class Climber extends SubsystemBase {
       PivotMotor.setPosition(0);
       // setPivotSetpoint(0);
     }
+<<<<<<< HEAD
 
      if(topLS.get()){
       leaderMotor.setPosition(0);
@@ -375,5 +425,31 @@ public class Climber extends SubsystemBase {
     PivotMotor.setControl(pivotVoltageReq.withOutput(pivotVoltage));
 
     troubleshoot();
+=======
+
+    if(pivotLSPressed() && PivotMotor.get() < 0){
+      stopMotor();
+    }
+
+    if(topLS.get()){
+      leaderMotor.setPosition(0);
+    }
+
+    if(topLS.get() && (leaderMotor.get() > 0)){
+      stopMotors();
+    }
+    else if(hallEffect.get() && (leaderMotor.get() < 0)){
+      stopMotors();
+    }
+
+    leaderMotor.setControl(profileReq.withPosition(climbSetpoint));
+    PivotMotor.setControl(pivotMagic.withPosition(pivotSetpoint));
+
+    SmartDashboard.putNumber("[C] Leader Position", getLeaderPosition());
+    SmartDashboard.putBoolean("[C] Hall Effect", getHallEffectValue());
+
+    SmartDashboard.putBoolean("Limit Switch", pivotLSPressed());
+    SmartDashboard.putNumber("Pivot Position", getPivotEncoder());
+>>>>>>> 9596b3513e93dc63fbcb6e643550ee34bd3e1b88
   }
 }
