@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import frc.robot.climber.Climber;
 
+import frc.robot.commands.VerticalCmd;
+
 public class RobotContainer {
 
   Climber climber;
@@ -22,10 +24,6 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    //Only for tuning kS and kG for Motion Magic of the elevator. Comment when done.
-    // xbox.a().whileTrue(climber.climbVoltage());
-    // xbox.a().whileFalse(climber.zeroVoltage());
-    
     //Elevator Manual Buttons
     // xbox.a().whileTrue(climber.up());
     // xbox.a().whileFalse(climber.stop());
@@ -37,10 +35,7 @@ public class RobotContainer {
     // xbox.a().whileFalse(climber.stopPivot());
     // xbox.b().whileTrue(climber.counterClockWise());
     // xbox.b().whileFalse(climber.stopPivot());
-
-    //Motion Magic Commands
-    // xbox.x().onTrue(climber.verticalPivot());
-    // xbox.y().onTrue(climber.level1());
+    // xbox.x().onTrue(new VerticalCmd(climber, 25));
   }
 
   public Command getAutonomousCommand() {
